@@ -1,0 +1,900 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>위반유형별 징계수위 및 효력</title>
+<style>
+:root {
+  --ground: #0D1A27;
+  --surface: #132236;
+  --surface-2: #1A2D45;
+  --border: #243D58;
+  --border-light: #2E4D6A;
+  --text: #E0EDF8;
+  --text-dim: #96BAD4;
+  --text-label: #C0D8EA;
+  --accent: #0FB87A;
+  --accent-dim: rgba(15,184,122,0.12);
+  --amber: #F0A022;
+  --amber-dim: rgba(240,160,34,0.12);
+  --blue: #3A8FE8;
+  --blue-dim: rgba(58,143,232,0.12);
+  --c0: #34D399; --c1: #A3E4C0; --c2: #FCD34D;
+  --c3: #FB923C; --c4: #F97316; --c5: #EF4444; --c6: #991B1B;
+  --radius: 8px;
+  --font: 'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',-apple-system,system-ui,sans-serif;
+}
+
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; scroll-behavior: smooth; }
+body { background: var(--ground); color: var(--text); font-family: var(--font); line-height: 1.6; min-height: 100vh; }
+
+/* ─── HEADER ─────────────────────────────────── */
+.header {
+  background: linear-gradient(135deg, #091522 0%, #122033 60%, #0c1d2e 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 32px 24px 28px;
+  position: relative; overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    -55deg,
+    transparent,
+    transparent 18px,
+    rgba(15,184,122,0.035) 18px,
+    rgba(15,184,122,0.035) 20px
+  );
+  pointer-events: none;
+}
+.header-inner { max-width: 960px; margin: 0 auto; position: relative; }
+.header-badge {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: 0; margin-bottom: 16px;
+}
+.corp-logo-img {
+  height: 28px;
+  width: auto;
+  display: block;
+  opacity: 0.88;
+  filter: brightness(1.05) drop-shadow(0 1px 3px rgba(0,0,0,0.3));
+  transition: opacity .2s;
+}
+.corp-logo-img:hover { opacity: 1; }
+.header h1 {
+  font-size: clamp(28px, 5vw, 42px); font-weight: 800;
+  color: #EDF3F8; letter-spacing: -0.02em; line-height: 1.2;
+  margin-bottom: 8px;
+}
+.header h1 span { color: var(--accent); }
+.header p { color: #a8d8ea; font-size: 15px; font-weight: 600; max-width: 620px; line-height: 1.7; }
+
+/* ─── MAIN LAYOUT ─────────────────────────────── */
+.main { max-width: 960px; margin: 0 auto; padding: 32px 20px 80px; }
+
+.step-block { margin-bottom: 32px; }
+.step-label {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-size: 18px; font-weight: 800; letter-spacing: 0.02em;
+  color: #fff; text-transform: none;
+  margin-bottom: 16px;
+  padding: 8px 20px 8px 10px;
+  border-radius: 8px;
+}
+.step-label::before {
+  content: attr(data-n);
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,0.25); border: 2px solid rgba(255,255,255,0.5);
+  font-size: 15px; font-weight: 900; color: #fff;
+  flex-shrink: 0;
+}
+/* 단계별 배경색 */
+#block1 .step-label { background: #1565c0; }
+#block2 .step-label { background: #6a1b9a; }
+#block3 .step-label { background: #e65100; }
+.step-label.active::before { background: rgba(255,255,255,0.3); border-color: #fff; color: #fff; }
+
+/* ─── DOC CARDS ───────────────────────────────── */
+.doc-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+@media (max-width: 600px) { .doc-grid { grid-template-columns: 1fr; } }
+
+.doc-card {
+  background: var(--surface); border: 2px solid var(--border);
+  border-radius: var(--radius); padding: 20px 18px;
+  cursor: pointer; transition: border-color .18s, background .18s, transform .12s;
+  position: relative; overflow: hidden;
+}
+.doc-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 4px;
+}
+.doc-card[data-id="behavior"]::before { background: var(--accent); }
+.doc-card[data-id="contract"]::before { background: var(--blue); }
+.doc-card[data-id="management"]::before { background: var(--amber); }
+.doc-card:hover { background: var(--surface-2); transform: translateY(-1px); }
+.doc-card.active { background: var(--surface-2); }
+.doc-card[data-id="behavior"].active { border-color: var(--accent); }
+.doc-card[data-id="contract"].active { border-color: var(--blue); }
+.doc-card[data-id="management"].active { border-color: var(--amber); }
+.doc-card-tag {
+  font-size: 15px; font-weight: 900; letter-spacing: 0.02em;
+  text-transform: none; margin-bottom: 8px;
+}
+.doc-card[data-id="behavior"] .doc-card-tag { color: var(--accent); }
+.doc-card[data-id="contract"] .doc-card-tag { color: var(--blue); }
+.doc-card[data-id="management"] .doc-card-tag { color: var(--amber); }
+.doc-card h3 { font-size: 15px; font-weight: 700; color: #EEF5FB; margin-bottom: 4px; }
+.doc-card p { font-size: 11.5px; color: #B0CFDF; line-height: 1.5; }
+
+/* ─── VIOLATION LIST ──────────────────────────── */
+.violation-list { display: flex; flex-direction: column; gap: 8px; }
+.v-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 14px 16px;
+  cursor: pointer; transition: border-color .15s, background .15s;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.v-card:hover { background: var(--surface-2); border-color: var(--border-light); }
+.v-card.active { background: var(--surface-2); border-color: var(--accent); }
+.v-card.use-table2.active { border-color: var(--amber); }
+.v-dot {
+  width: 8px; height: 8px; border-radius: 50%; margin-top: 6px;
+  background: var(--text-dim); flex-shrink: 0; transition: background .15s;
+}
+.v-card.active .v-dot { background: var(--accent); }
+.v-card.use-table2.active .v-dot { background: var(--amber); }
+.v-info { flex: 1; min-width: 0; }
+.v-name { font-size: 14px; font-weight: 700; color: #EEF5FB; margin-bottom: 3px; }
+.v-desc { font-size: 12px; color: #B0CFDF; }
+.v-ref { font-size: 10.5px; color: #8CBAD0; margin-top: 4px; font-style: italic; }
+
+/* ─── SEVERITY SELECTOR ───────────────────────── */
+.sev-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+@media (max-width: 640px) { .sev-grid { grid-template-columns: repeat(2,1fr); } }
+
+.sev-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 14px 12px;
+  cursor: pointer; text-align: center; transition: border-color .15s, background .15s;
+}
+.sev-card:hover { background: var(--surface-2); }
+.sev-card.active { background: var(--surface-2); border-color: var(--accent); }
+.sev-card-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800;
+  margin: 0 auto 8px;
+  background: var(--surface-2); border: 1px solid var(--border-light);
+  color: var(--text-label);
+  transition: background .15s, border-color .15s, color .15s;
+}
+.sev-card.active .sev-card-num { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+.sev-card h4 { font-size: 12.5px; font-weight: 700; color: #EEF5FB; margin-bottom: 4px; }
+.sev-card p { font-size: 10.5px; color: #B0CFDF; line-height: 1.4; }
+
+/* amount selector */
+.amount-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+@media (max-width: 480px) { .amount-grid { grid-template-columns: 1fr; } }
+.amount-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 12px 14px;
+  cursor: pointer; transition: border-color .15s, background .15s;
+}
+.amount-card:hover { background: var(--surface-2); }
+.amount-card.active { background: var(--surface-2); border-color: var(--amber); }
+.amount-card .a-label { font-size: 13px; font-weight: 700; color: #DDE8F0; margin-bottom: 3px; }
+.amount-card .a-desc { font-size: 11px; color: var(--text-dim); }
+
+.receive-toggle {
+  display: flex; gap: 10px; margin-top: 8px;
+}
+.rtoggle {
+  flex: 1; padding: 14px 10px; text-align: center;
+  background: var(--surface); border: 2px solid #00897b;
+  border-radius: var(--radius); cursor: pointer;
+  font-size: 15px; font-weight: 800; color: #80cbc4;
+  transition: border-color .15s, background .15s, color .15s;
+  letter-spacing: 0.01em;
+}
+.rtoggle:hover { background: rgba(0,137,123,0.15); color: #fff; }
+.rtoggle.active { background: #00695c; border-color: #00e5d0; color: #fff; box-shadow: 0 0 10px rgba(0,229,208,0.3); }
+
+/* ─── RESULT ──────────────────────────────────── */
+.result-box {
+  background: #cce8f8;
+  border: 1.5px solid #8ecae6;
+  border-radius: var(--radius);
+  overflow: hidden;
+  animation: fadeIn .3s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.spectrum-wrap { padding: 24px 24px 0; }
+.spectrum-track {
+  display: grid; grid-template-columns: repeat(7,1fr);
+  border-radius: 6px; overflow: hidden;
+  height: 36px;
+}
+.spec-seg {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0.04em;
+  color: rgba(0,0,0,0.7);
+  transition: box-shadow .25s;
+}
+.spec-seg.lit {
+  color: #fff;
+  box-shadow: 0 0 0 2px white inset;
+  position: relative;
+}
+.spec-seg.lit::after {
+  content: '▼';
+  position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+  font-size: 9px; color: white;
+  animation: bob .8s ease-in-out infinite;
+}
+@keyframes bob { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(-3px)} }
+
+.spec-labels {
+  display: grid; grid-template-columns: repeat(7,1fr);
+  margin-top: 6px; padding-bottom: 16px;
+}
+.spec-labels span { text-align: center; font-size: 9px; color: #2c6e8a; }
+
+/* result cards */
+.result-cards {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0; border-top: 1px solid #8ecae6;
+}
+@media (max-width: 560px) { .result-cards { grid-template-columns: 1fr; } }
+.result-card { padding: 20px 24px; border-right: 1px solid #8ecae6; }
+.result-card:last-child { border-right: none; }
+.rc-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #2c6e8a; margin-bottom: 8px; }
+.rc-level {
+  font-size: 22px; font-weight: 800; letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+.rc-sub { font-size: 12px; color: #2c5f75; line-height: 1.5; }
+.rc-range { font-size: 12.5px; color: #1e4a60; line-height: 1.7; }
+
+/* effects table */
+.effects-section { padding: 0 24px 24px; border-top: 1px solid var(--border); margin-top: 0; background: #ffffff; }
+.effects-title { font-size: 20px; font-weight: 900; letter-spacing: -0.01em; text-transform: none; color: #0a3d62; padding: 20px 0 14px; border-bottom: 3px solid #0a3d62; margin-bottom: 4px; }
+.effects-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.effects-table th {
+  background: #f0f2f4; color: #444;
+  font-weight: 700; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase;
+  padding: 10px 14px; text-align: left;
+  border-bottom: 1px solid #dde1e6;
+}
+.effects-table td {
+  padding: 10px 14px; border-bottom: 1px solid #dde1e6;
+  color: #333; vertical-align: top; line-height: 1.55;
+}
+.effects-table tr:last-child td { border-bottom: none; }
+.effects-table td:first-child { color: #555; font-weight: 600; white-space: nowrap; }
+.tag {
+  display: inline-block; font-size: 10px; font-weight: 700;
+  padding: 2px 7px; border-radius: 3px; margin-right: 4px;
+}
+.tag-red { background: rgba(153,27,27,0.25); color: #FCA5A5; }
+.tag-orange { background: rgba(249,115,22,0.2); color: #FDBA74; }
+.tag-yellow { background: rgba(252,211,77,0.15); color: #FDE68A; }
+.tag-green { background: rgba(52,211,153,0.15); color: #6EE7B7; }
+
+/* ─── MODIFIER SECTION ────────────────────────── */
+.modifier-block {
+  margin-top: 28px;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.modifier-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 22px; cursor: pointer;
+  background: linear-gradient(90deg, #1a2f45 0%, #162840 100%);
+  border-bottom: 1px solid transparent;
+  transition: border-color .2s, background .2s;
+}
+.modifier-head:hover { background: linear-gradient(90deg, #1e3650 0%, #1a3048 100%); }
+.modifier-head.open { border-bottom-color: var(--border); }
+.modifier-head h3 { font-size: 18px; font-weight: 900; color: #EEF5FB; letter-spacing: -0.01em; }
+.modifier-head span { font-size: 20px; color: #C0D8EA; transition: transform .2s; }
+.modifier-head.open span { transform: rotate(180deg); }
+.modifier-body { padding: 0; max-height: 0; overflow: hidden; transition: max-height .3s ease, padding .3s ease; }
+.modifier-body.open { max-height: 600px; padding: 0 0 4px; }
+.mod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+@media (max-width: 560px) { .mod-grid { grid-template-columns: 1fr; } }
+.mod-item { padding: 16px 22px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.mod-item:nth-child(2n) { border-right: none; }
+.mod-item h4 { font-size: 13px; font-weight: 800; color: #D8EBF7; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.mod-badge {
+  font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 3px;
+}
+.mod-badge-up { background: rgba(239,68,68,0.3); color: #FFBBBB; }
+.mod-badge-down { background: rgba(52,211,153,0.25); color: #88F0C0; }
+.mod-item p { font-size: 12px; color: #A8C8DC; line-height: 1.6; }
+
+/* ④ 수수유형 레이블 */
+.step-label-4 {
+  background: #00695c;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+/* 징계수위 결과 레이블 */
+.result-step-label {
+  background: #cce8f8;
+  color: #0a3d62 !important;
+  padding: 8px 18px;
+  border-radius: 8px;
+  display: inline-flex;
+}
+
+/* hidden / shown */
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-badge">
+      <img class="corp-logo-img" src="data:image/jpeg;base64,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Bdwo2Um7ApynNACbPek2+4pzDNJs+lACbfcUbfcUuz6UbPpQAm33FG33FLs+lGz6UAJt9xRjFLs+lBSgBpGaVYlIo2NTh8ooJsIIwKQAg07cKN2TQVsLRRRQAU1xkU6gnFADUj2pSFNvenbqTYaAIyPm9KcoU9/ypTHn0pBHt7ik0nuFuov3elITmnBM0FMU9gGYxT0GKbkCpAcigAooooAMc0UUUAFFFFABRRRQAUUUUAFFFFABRRRQAEZoC7aKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKMZoooACOKb9004nFNOCaVkAoGRQV3daQHBp1PYAAwKMZoooAMYooooAKKKKACiiiiwBRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAYzSbKKKAALiloooAKKKKACiiigAooooAKKKKACiiigAoxzRRQAUUUUAFFFFABRjNFFABijFFFABjFBGaKKAG7KcBiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACjGKKKADHNFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAH/9k=" alt="한국도로공사 로고">
+    </div>
+    <h1>위반 유형별 <span>징계수위</span> 및 <span style="color:#ef4444">효력</span></h1>
+    <p style="font-size:13px; color:#96BAD4; margin-top:8px;">아래 3개 규정 위반 시 적용되는 징계수위, 효력 조회&nbsp;&nbsp;<span style="color:#fcd34d; font-weight:700;">(주의, 경고는 징계가 아님)</span></p>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- STEP 1 -->
+  <div class="step-block" id="block1">
+    <div class="step-label active" data-n="1">위반한 규정을 선택하세요</div>
+    <div class="doc-grid">
+      <div class="doc-card" data-id="behavior" onclick="selectDoc('behavior')">
+        <div class="doc-card-tag">임직원 행동강령</div>
+        <h3>행동강령 위반</h3>
+        <p>금품·향응 수수, 부정청탁, 이권 개입, 직무관련 정보 거래 등 청렴 의무 위반</p>
+      </div>
+      <div class="doc-card" data-id="contract" onclick="selectDoc('contract')">
+        <div class="doc-card-tag">공사계약일반조건</div>
+        <h3>계약·감독 위반</h3>
+        <p>감독 의무 태만, 기성 부당 처리, 계약 절차 위반 등 계약 관리 의무 위반</p>
+      </div>
+      <div class="doc-card" data-id="management" onclick="selectDoc('management')">
+        <div class="doc-card-tag">공사관리규정</div>
+        <h3>공사관리 위반</h3>
+        <p>현장 이탈, 품질검사 소홀, 문서 위조, 공사비 횡령 등 공사 관리 의무 위반</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-block hidden" id="block2">
+    <div class="step-label" data-n="2">위반 행위를 선택하세요</div>
+    <div class="violation-list" id="vList"></div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-block hidden" id="block3">
+    <div class="step-label" data-n="3">비위의 정도를 선택하세요</div>
+    <!-- Standard severity selector -->
+    <div id="sevSelector">
+      <div class="sev-grid">
+        <div class="sev-card" data-col="0" onclick="selectSev(0)">
+          <div class="sev-card-num">1</div>
+          <h4>중대 + 고의</h4>
+          <p>비위의 도가 중대하고 고의에 의한 경우</p>
+        </div>
+        <div class="sev-card" data-col="1" onclick="selectSev(1)">
+          <div class="sev-card-num">2</div>
+          <h4>중대 + 중과실<br>또는 경미 + 고의</h4>
+          <p>비위가 중대하나 과실이거나, 경미하지만 고의인 경우</p>
+        </div>
+        <div class="sev-card" data-col="2" onclick="selectSev(2)">
+          <div class="sev-card-num">3</div>
+          <h4>중대 + 경과실<br>또는 경미 + 중과실</h4>
+          <p>비위가 중대하나 경과실이거나, 경미하면서 과실인 경우</p>
+        </div>
+        <div class="sev-card" data-col="3" onclick="selectSev(3)">
+          <div class="sev-card-num">4</div>
+          <h4>경미 + 경과실</h4>
+          <p>비위의 도가 경미하고 경과실에 의한 경우</p>
+        </div>
+      </div>
+    </div>
+    <!-- Bribery selector (금품수수) -->
+    <div id="briberySelector" class="hidden">
+      <p style="font-size:12px;color:var(--text-dim);margin-bottom:14px;">금품등 수수 금지 위반 — 별표 2 기준이 적용됩니다. 수수 금액과 유형을 선택하세요.</p>
+      <div class="amount-grid" id="amountGrid">
+        <div class="amount-card" data-amt="0" onclick="selectAmt(0)">
+          <div class="a-label">100만원 미만</div>
+          <div class="a-desc">1회 100만원 미만 금품</div>
+        </div>
+        <div class="amount-card" data-amt="1" onclick="selectAmt(1)">
+          <div class="a-label">100만원 이상 ~ 300만원 미만</div>
+          <div class="a-desc">또는 연간 300만원 초과</div>
+        </div>
+        <div class="amount-card" data-amt="2" onclick="selectAmt(2)">
+          <div class="a-label">300만원 이상 ~ 500만원 미만</div>
+          <div class="a-desc">중간 규모 금품 수수</div>
+        </div>
+        <div class="amount-card" data-amt="3" onclick="selectAmt(3)">
+          <div class="a-label">500만원 이상</div>
+          <div class="a-desc">고액 금품 수수</div>
+        </div>
+      </div>
+      <div class="step-label step-label-4" data-n="4">수수 유형을 선택하세요</div>
+      <div class="receive-toggle">
+        <div class="rtoggle" data-mode="passive" onclick="selectMode('passive')">수동 수수 (받은 경우)</div>
+        <div class="rtoggle" data-mode="active" onclick="selectMode('active')">능동 수수 (요구·약속한 경우)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="step-block hidden" id="block4">
+    <div class="step-label active result-step-label" data-n="★">징계수위</div>
+    <div class="result-box">
+      <div class="spectrum-wrap">
+        <div class="spectrum-track" id="specTrack">
+          <div class="spec-seg" style="background:var(--c0)" data-lv="0">주의경고</div>
+          <div class="spec-seg" style="background:var(--c1)" data-lv="1">견책</div>
+          <div class="spec-seg" style="background:var(--c2)" data-lv="2">감봉</div>
+          <div class="spec-seg" style="background:var(--c3)" data-lv="3">정직</div>
+          <div class="spec-seg" style="background:var(--c4)" data-lv="4">강급</div>
+          <div class="spec-seg" style="background:var(--c5)" data-lv="5">해임</div>
+          <div class="spec-seg" style="background:var(--c6)" data-lv="6">파면</div>
+        </div>
+        <div class="spec-labels">
+          <span>경미</span><span></span><span></span><span></span><span></span><span></span><span>중징계</span>
+        </div>
+      </div>
+      <div class="result-cards" id="resultCards">
+        <div class="result-card">
+          <div class="rc-eyebrow">징계 양정 범위</div>
+          <div class="rc-level" id="rcLevel">—</div>
+          <div class="rc-sub" id="rcSub"></div>
+        </div>
+        <div class="result-card">
+          <div class="rc-eyebrow">해당 조항</div>
+          <div class="rc-range" id="rcRange"></div>
+        </div>
+      </div>
+      <div class="effects-section" id="effectsSection">
+        <div class="effects-title">인사처분 효력 (2024.3 기준)</div>
+        <table class="effects-table" id="effectsTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODIFIERS -->
+  <div class="modifier-block hidden" id="modifierBlock">
+    <div class="modifier-head" onclick="toggleModifiers(this)">
+      <h3>가중 · 감경 사유 참고</h3>
+      <span>▾</span>
+    </div>
+    <div class="modifier-body">
+      <div class="mod-grid">
+        <div class="mod-item">
+          <h4><span class="mod-badge mod-badge-up">가중 +1단계</span> 2개 이상 비위 경합</h4>
+          <p>서로 관련 없는 두 개 이상의 비위가 경합될 때, 가장 중한 비위에서 1단계 위로 가중 요구 가능</p>
+        </div>
+        <div class="mod-item">
+          <h4><span class="mod-badge mod-badge-up">가중 +2단계</span> 승진임용 제한기간 중 비위</h4>
+          <p>이미 징계 처분을 받은 직원이 승진임용제한기간 중에 다시 비위를 저지른 경우 2단계 가중</p>
+        </div>
+        <div class="mod-item">
+          <h4><span class="mod-badge mod-badge-up">가중 +1단계</span> 감사 반복 지적 사항</h4>
+          <p>각종 감사에서 반복적으로 지적된 사항을 다시 위반하거나, 제한기간 종료 후 1년 내 비위</p>
+        </div>
+        <div class="mod-item">
+          <h4><span class="mod-badge mod-badge-up">경고→견책</span> 1년 3회 이상 경고</h4>
+          <p>동일 직급에서 1년에 경고처분 3회 이상 또는 감사에서 반복 지적 경우 경고→견책으로 가중</p>
+        </div>
+        <div class="mod-item">
+          <h4><span class="mod-badge mod-badge-down">감경 또는 면책</span> 자진신고</h4>
+          <p>감사부서·사정기관이 인지하기 전에 스스로 소속 기관장이나 감사부서에 비위를 자진 신고한 경우</p>
+        </div>
+        <div class="mod-item">
+          <h4><span class="mod-badge mod-badge-down">감경</span> 적극행정 과실</h4>
+          <p>적극적·헌신적으로 직무 수행 중 발생한 과실로 「인사관리업무기준」 제37조 제4항에 해당하는 경우</p>
+        </div>
+        <div class="mod-item">
+          <h4><span class="mod-badge mod-badge-down">공여자 감경</span> 상급자 요구에 의한 금품 제공</h4>
+          <p>상급자 또는 상급 부서 직원의 요구에 의해 금품을 제공한 경우 공여자는 감경 또는 면책 가능</p>
+        </div>
+        <div class="mod-item">
+          <h4><span class="mod-badge mod-badge-down">1단계 낮게</span> 신고 없는 감독자 (부패행위)</h4>
+          <p>부패행위를 신고하지 않은 직상 감독자는 비위행위자보다 1단계, 차상 감독자는 2단계 낮은 징계</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ─── DATA ─────────────────────────────────────────────────
+
+// LEVELS: index 0(lowest)→6(highest)
+const LEVEL_NAMES = ['주의·경고','견책','감봉','정직','강급','해임','파면'];
+
+// each violation: col = [[...level indices]×4] for standard
+// or useTable2: true, table2Type for bribery path
+const VIOLATIONS = {
+  behavior: [
+    {
+      id:'b1', name:'금품·향응 수수 (직무 무관)', useTable2:true, table2Type:'nonRelated',
+      ref:'행동강령 제16조 / 징계양정기준 별표2',
+      desc:'직무관련 없이 직무관련자 또는 직무관련 임직원으로부터 금품·향응을 수수한 경우',
+    },
+    {
+      id:'b2', name:'금품·향응 수수 (직무 직접 관련, 위법처분 없음)', useTable2:true, table2Type:'relatedNoWrong',
+      ref:'행동강령 제16조 / 징계양정기준 별표2',
+      desc:'직무와 직접 관련하여 금품을 수수했으나, 위법·부당한 처분은 하지 않은 경우',
+    },
+    {
+      id:'b3', name:'금품·향응 수수 (직무 관련 + 위법·부당 처분)', useTable2:true, table2Type:'relatedWithWrong',
+      ref:'행동강령 제16조 / 징계양정기준 별표2',
+      desc:'직무와 직접 관련하여 금품을 수수하고, 위법·부당한 처분까지 한 경우 (가장 중한 유형)',
+    },
+    {
+      id:'b4', name:'부정청탁 (제5조, 제9조)',
+      ref:'행동강령 제9조 / 징계양정기준 별표1의5',
+      desc:'자신 또는 타인을 위해 다른 직원에게 부당한 직무수행을 강요하거나 청탁한 경우',
+      col:[[6,5],[5,4],[3,2],[1]],
+    },
+    {
+      id:'b5', name:'부정청탁에 따른 직무수행 금지 위반',
+      ref:'행동강령 제5조 / 징계양정기준 별표1의5',
+      desc:'부정청탁을 받고 이에 따라 직무를 수행한 경우 (부정청탁 수락·이행)',
+      col:[[6],[6,5],[4,3],[2,1]],
+    },
+    {
+      id:'b6', name:'이권 개입·직위 사적 이용·알선·청탁 등 행동강령 위반 (금품수수 외)',
+      ref:'행동강령 제10-12조, 제19조 / 징계양정기준 별표1의5',
+      desc:'이권 개입, 직위의 사적 이용, 사적 노무 요구, 협찬 요구 등 금품수수 외 행동강령 위반',
+      col:[[6],[5,4],[4,3],[2,1]],
+    },
+    {
+      id:'b7', name:'직무관련 정보를 이용한 재산 거래',
+      ref:'행동강령 제13조 / 징계양정기준 별표1의5',
+      desc:'직무수행 중 알게 된 미공개 정보를 이용하여 주식·부동산 등 재산상 거래·투자를 한 경우',
+      col:[[6],[4,3],[2],[1]],
+    },
+    {
+      id:'b8', name:'공직자 이해충돌 방지법 신고·제출 의무 위반',
+      ref:'공직자 이해충돌방지법 제5·6·8·9·15조 / 징계양정기준 별표1의5',
+      desc:'사적 이해관계 신고, 직무 회피 신청 등 신고·신청·제출 의무를 위반한 경우',
+      col:[[6,5],[4,3],[2],[1]],
+    },
+  ],
+  contract: [
+    {
+      id:'c1', name:'감독 의무 태만 (직무유기·직무태만)',
+      ref:'공사계약일반조건 제16조 / 징계양정기준 별표1 제1조',
+      desc:'공사감독원으로서 계약 이행 확인·검사 의무를 소홀히 하여 공사 품질 저하 또는 손실 발생',
+      col:[[6],[5,4],[4,3],[2,1]],
+    },
+    {
+      id:'c2', name:'소극적 감독 행태 (부작위로 손실 유발)',
+      ref:'공사계약일반조건 제16조 / 징계양정기준 별표1 제1조나',
+      desc:'부작위 또는 직무태만으로 국민의 권익 침해 또는 공사 재정상 손실이 발생한 소극행정',
+      col:[[6],[6,5],[4,3],[2,1]],
+    },
+    {
+      id:'c3', name:'기성 검사·준공 검사 허위·부당 처리',
+      ref:'공사계약일반조건 제37-38조 / 징계양정기준 별표1 제7조나',
+      desc:'실제 공정과 다르게 기성금 산정, 부적격 공사 준공 처리 등 계약 예산 부당 집행',
+      col:[[6,5,4],[4,3],[2],[1]],
+    },
+    {
+      id:'c4', name:'계약 관련 금품 수수 (특혜 제공)', useTable2:true, table2Type:'relatedWithWrong',
+      ref:'공사계약일반조건 제2조 / 징계양정기준 별표2',
+      desc:'입찰·계약 관련 특정 업체에 특혜를 주고 금품·향응을 수수한 경우',
+    },
+    {
+      id:'c5', name:'설계변경 부당 처리·승인',
+      ref:'공사계약일반조건 제19-24조 / 징계양정기준 별표1 제7조나',
+      desc:'근거 없이 설계변경을 승인하거나 절차를 위반하여 부당하게 공사금액을 증액한 경우',
+      col:[[6,5,4],[4,3],[2],[1]],
+    },
+    {
+      id:'c6', name:'공사용지·자재 부당 처리',
+      ref:'공사계약일반조건 제11-13조 / 징계양정기준 별표1 제7조',
+      desc:'지급자재 무단 유용, 공사용지 관련 의무 전가 등 계약상 의무 위반',
+      col:[[6,5,4],[4,3],[2],[1]],
+    },
+  ],
+  management: [
+    {
+      id:'m1', name:'감독원 현장 이탈·상주 의무 위반',
+      ref:'공사관리규정 제22조 / 징계양정기준 별표1 제4조나',
+      desc:'공사감독원 또는 공사관리관이 현장 상주 의무를 위반하고 현장을 이탈한 경우',
+      col:[[5,4],[4,3],[2],[1]],
+    },
+    {
+      id:'m2', name:'품질검사 소홀·불합격 자재 사용 묵인',
+      ref:'공사관리규정 제25-29조 / 징계양정기준 별표1 제1조',
+      desc:'시공 자재 검사를 미시행하거나 불합격 자재의 사용을 묵인하여 공사 품질을 저해한 경우',
+      col:[[6],[5,4],[4,3],[2,1]],
+    },
+    {
+      id:'m3', name:'공사비 횡령·유용',
+      ref:'공사관리규정 제40조 / 징계양정기준 별표1 제7조가',
+      desc:'공사 관련 공금 또는 물품을 개인 목적으로 횡령하거나 유용한 경우',
+      col:[[6],[5,4],[4,3],[2,1]],
+    },
+    {
+      id:'m4', name:'공사 관련 문서 위조·변조·허위 작성',
+      ref:'공사관리규정 제22조 / 징계양정기준 별표1 제8조',
+      desc:'감독 일지, 준공 서류, 기성 내역서 등 공사 관련 공문서를 위조·변조하거나 허위로 작성한 경우',
+      col:[[6,5,4],[4,3],[2],[1]],
+    },
+    {
+      id:'m5', name:'설계VE·사업비 절감심사 의무 미이행',
+      ref:'공사관리규정 제9-12조 / 징계양정기준 별표1 제1조',
+      desc:'의무 시행 대상임에도 설계VE 또는 사업비 절감심사를 실시하지 않아 예산 손실이 발생한 경우',
+      col:[[6,5],[5,4],[3],[1]],
+    },
+    {
+      id:'m6', name:'기술자문위원회 심의 없이 중대 설계변경',
+      ref:'공사관리규정 제6조2호 / 징계양정기준 별표1 제2조',
+      desc:'100억원 이상 공사의 중대한 설계변경 시 기술자문위원회 심의를 거치지 않고 임의 처리한 경우',
+      col:[[5,4],[4,3],[2],[1]],
+    },
+    {
+      id:'m7', name:'공사 비밀 누설 또는 보안관리 소홀',
+      ref:'공사관리규정 / 징계양정기준 별표1 제10조',
+      desc:'계약 관련 정보, 설계도면 등 공사 기밀을 허가 없이 외부에 누설하거나 분실한 경우',
+      col:[[6],[5,4],[4,3],[2,1]],
+    },
+  ],
+};
+
+// 별표2: bribery table [amt_index][passive/active] = [level_indices]
+const TABLE2 = {
+  nonRelated: {
+    passive: [[2,3,4],[4,5,6],[5,6],[6]],
+    active:  [[3,4,5],[5,6],[6],[6]],
+  },
+  relatedNoWrong: {
+    passive: [[3,4,5],[5,6],[6],[6]],
+    active:  [[4,5,6],[6],[6],[6]],
+  },
+  relatedWithWrong: {
+    passive: [[4,5,6],[6],[6],[6]],
+    active:  [[5,6],[6],[6],[6]],
+  },
+};
+
+const EFFECTS = {
+  0: { label:'주의·경고', color:'var(--c0)', dark:'#166534',
+    rows:[
+      ['인사·보수','근무평정 감점 (1년간): 경고 0.05점/회, 주의 0.02점/2회'],
+      ['승진','제한 없음'],
+      ['처분기록','별도 말소 기준 없음 (징계 아님)'],
+      ['취업제한','없음'],
+      ['비고','징계가 아닌 인사상 조치. 동일 직급에서 1년 3회 이상 경고 시 견책으로 가중 가능'],
+    ]
+  },
+  1: { label:'견책', color:'var(--c1)', dark:'#365314',
+    rows:[
+      ['인사·보수','호봉제: 정기승급 제한 6개월 / 연봉제: 연봉평가 C등급 (6개월 적용)'],
+      ['승진','승진 제한 6개월'],
+      ['처분기록','3년 후 말소'],
+      ['취업제한','없음'],
+      ['비고','성과연봉 △1등급 조정 (부패행위 외 대상). 경고 3회 이상 시 견책으로 가중될 수 있음'],
+    ]
+  },
+  2: { label:'감봉', color:'var(--c2)', dark:'#78350F',
+    rows:[
+      ['인사·보수','호봉제: 정기보수 1/60 감액 (감봉기간 1~3개월) / 연봉제: 기준급·직무급 1/60 감액, 연봉평가 D등급'],
+      ['승진','승진 제한 감봉기간 + 12개월'],
+      ['처분기록','5년 후 말소'],
+      ['취업제한','없음'],
+      ['비고','성과연봉 △2등급 조정 (감봉 이상 해당). 기관성과급 미지급 여부 해당 없음'],
+    ]
+  },
+  3: { label:'정직', color:'var(--c3)', dark:'#7C2D12',
+    rows:[
+      ['인사·보수','정직기간(1~3개월) 중 무보수 (호봉제·연봉제 동일) / 연봉평가 D등급'],
+      ['승진','승진 제한 정직기간 + 18개월'],
+      ['처분기록','7년 후 말소'],
+      ['취업제한','없음'],
+      ['비고','정직 이상 중징계 시 당해 연도 기관성과급 및 내부평가급 미지급. 성과연봉 △2등급'],
+    ]
+  },
+  4: { label:'강급', color:'var(--c4)', dark:'#7C2D12',
+    rows:[
+      ['인사·보수','강등 후 정직 3개월(무보수) / 호봉제: 승진 시 조정호봉 역적용(3급→4급 +6호봉) / 연봉제: D등급 + 연봉 3% 감액 / 직무급 감급기간(3개월) 미지급'],
+      ['승진','승진 제한 3개월 + 18개월 (총 21개월)'],
+      ['처분기록','7년 후 말소'],
+      ['취업제한','없음'],
+      ['비고','강급 후 정직 3개월 자동 집행. 호봉 역적용으로 사실상 장기 보수 감소 효과'],
+    ]
+  },
+  5: { label:'해임', color:'var(--c5)', dark:'#7F1D1D',
+    rows:[
+      ['인사·보수','즉시 퇴직 처리. 직위·보수 소멸'],
+      ['승진','해당 없음 (퇴직)'],
+      ['처분기록','해당 없음 (퇴직)'],
+      ['취업제한','3년간 영리사기업체 등 취업 제한 (부패방지법 제82조)'],
+      ['비고','퇴직금은 원칙적으로 지급. 파면과 달리 일부 재임용 가능성 있음'],
+    ]
+  },
+  6: { label:'파면', color:'var(--c6)', dark:'#450a0a',
+    rows:[
+      ['인사·보수','즉시 퇴직 처리. 직위·보수 소멸. 퇴직금 일부 감액 가능'],
+      ['승진','해당 없음 (퇴직)'],
+      ['처분기록','해당 없음 (퇴직)'],
+      ['취업제한','5년간 영리사기업체 등 취업 제한 (부패방지법 제82조)'],
+      ['비고','가장 중한 징계. 재임용 불가. 향후 공직 복귀에도 중대한 제한 발생'],
+    ]
+  },
+};
+
+const AMOUNT_LABELS = ['100만원 미만','100~300만원 미만','300~500만원 미만','500만원 이상'];
+const TABLE2_TYPE_NAMES = {
+  nonRelated:'직무 무관 수수',
+  relatedNoWrong:'직무 직접 관련 수수 (위법처분 없음)',
+  relatedWithWrong:'직무 관련 수수 + 위법·부당 처분',
+};
+
+// ─── STATE ────────────────────────────────────────────────
+let state = { doc:null, violation:null, col:null, amtIdx:null, mode:null };
+
+// ─── LOGIC ────────────────────────────────────────────────
+function selectDoc(docId) {
+  state.doc = docId; state.violation = null; state.col = null;
+  state.amtIdx = null; state.mode = null;
+  document.querySelectorAll('.doc-card').forEach(c=>c.classList.toggle('active', c.dataset.id===docId));
+  const block2 = document.getElementById('block2');
+  block2.classList.remove('hidden');
+  const vList = document.getElementById('vList');
+  vList.innerHTML = '';
+  VIOLATIONS[docId].forEach(v=>{
+    const el = document.createElement('div');
+    el.className = 'v-card' + (v.useTable2?' use-table2':'');
+    el.dataset.id = v.id;
+    el.innerHTML = `<div class="v-dot"></div><div class="v-info"><div class="v-name">${v.name}</div><div class="v-desc">${v.desc}</div><div class="v-ref">${v.ref}</div></div>`;
+    el.addEventListener('click', ()=>selectViolation(v.id));
+    vList.appendChild(el);
+  });
+  document.getElementById('block3').classList.add('hidden');
+  document.getElementById('block4').classList.add('hidden');
+  document.getElementById('modifierBlock').classList.add('hidden');
+  const lbl2 = block2.querySelector('.step-label');
+  lbl2.classList.remove('active');
+  block2.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function selectViolation(vId) {
+  const docVs = VIOLATIONS[state.doc];
+  const v = docVs.find(x=>x.id===vId);
+  state.violation = vId;
+  state.col = null; state.amtIdx = null; state.mode = null;
+
+  document.querySelectorAll('.v-card').forEach(c=>c.classList.toggle('active', c.dataset.id===vId));
+
+  const block3 = document.getElementById('block3');
+  block3.classList.remove('hidden');
+  const sevSel = document.getElementById('sevSelector');
+  const bribSel = document.getElementById('briberySelector');
+
+  if(v.useTable2){
+    sevSel.classList.add('hidden'); bribSel.classList.remove('hidden');
+    document.querySelectorAll('.amount-card').forEach(c=>c.classList.remove('active'));
+    document.querySelectorAll('.rtoggle').forEach(c=>c.classList.remove('active'));
+  } else {
+    sevSel.classList.remove('hidden'); bribSel.classList.add('hidden');
+    document.querySelectorAll('.sev-card').forEach(c=>c.classList.remove('active'));
+  }
+  document.getElementById('block4').classList.add('hidden');
+  document.getElementById('modifierBlock').classList.add('hidden');
+  const lbl3 = block3.querySelector('.step-label');
+  lbl3.classList.add('active');
+  block3.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function selectSev(col) {
+  state.col = col;
+  document.querySelectorAll('.sev-card').forEach(c=>c.classList.toggle('active', +c.dataset.col===col));
+  const docVs = VIOLATIONS[state.doc];
+  const v = docVs.find(x=>x.id===state.violation);
+  showResult(v.col[col], v.name, v.ref, null, null, v);
+}
+
+function selectAmt(idx) {
+  state.amtIdx = idx;
+  document.querySelectorAll('.amount-card').forEach(c=>c.classList.toggle('active', +c.dataset.amt===idx));
+  tryShowBribery();
+}
+
+function selectMode(mode) {
+  state.mode = mode;
+  document.querySelectorAll('.rtoggle').forEach(c=>c.classList.toggle('active', c.dataset.mode===mode));
+  tryShowBribery();
+}
+
+function tryShowBribery() {
+  if(state.amtIdx===null || !state.mode) return;
+  const docVs = VIOLATIONS[state.doc];
+  const v = docVs.find(x=>x.id===state.violation);
+  const tbl = TABLE2[v.table2Type];
+  const lvls = tbl[state.mode][state.amtIdx];
+  showResult(lvls, v.name, v.ref, AMOUNT_LABELS[state.amtIdx], state.mode, v);
+}
+
+function showResult(levelIdxArr, vName, vRef, amtLabel, mode, v) {
+  const block4 = document.getElementById('block4');
+  block4.classList.remove('hidden');
+
+  // spectrum
+  document.querySelectorAll('.spec-seg').forEach(seg=>{
+    const lv = +seg.dataset.lv;
+    const isLit = levelIdxArr.includes(lv);
+    seg.classList.toggle('lit', isLit);
+    seg.style.opacity = isLit ? '1' : '0.22';
+  });
+
+  // level text
+  const levelNames = levelIdxArr.map(i=>LEVEL_NAMES[i]);
+  const rcLevel = document.getElementById('rcLevel');
+  const maxLv = Math.max(...levelIdxArr);
+  const ef = EFFECTS[maxLv];
+  rcLevel.textContent = levelNames.join(' 또는 ');
+  rcLevel.style.color = ef.color;
+
+  const sub = document.getElementById('rcSub');
+  if(v.useTable2){
+    sub.textContent = `별표2 기준 적용 — ${TABLE2_TYPE_NAMES[v.table2Type]}`;
+    if(amtLabel) sub.textContent += ` / ${amtLabel} / ${mode==='passive'?'수동 수수':'능동 수수(요구·약속)'}`;
+  } else {
+    const colLabels = ['중대 + 고의','중대 + 중과실 또는 경미 + 고의','중대 + 경과실 또는 경미 + 중과실','경미 + 경과실'];
+    sub.textContent = `별표1 기준 적용 — ${colLabels[state.col]}`;
+  }
+
+  const rcRange = document.getElementById('rcRange');
+  rcRange.innerHTML = `<strong style="color:#DDE8F0">위반 행위:</strong> ${vName}<br><span style="font-size:11px;color:var(--text-dim)">${vRef}</span>`;
+
+  // effects table
+  const tbl = document.getElementById('effectsTable');
+  tbl.innerHTML = `<thead><tr><th style="width:90px">항목</th><th>내용</th></tr></thead><tbody>`;
+  let rows = [];
+  // Show effects for each applicable level
+  if(levelIdxArr.length === 1) {
+    rows = EFFECTS[levelIdxArr[0]].rows;
+  } else {
+    // Show for the highest level primarily, with note about range
+    rows = EFFECTS[maxLv].rows;
+  }
+  rows.forEach(([k,v2])=>{
+    tbl.innerHTML += `<tr><td>${k}</td><td>${v2}</td></tr>`;
+  });
+  // If range, add note
+  if(levelIdxArr.length > 1) {
+    const minLv = Math.min(...levelIdxArr);
+    tbl.innerHTML += `<tr><td>양정 범위</td><td>인사위원회가 비위의 정도, 개전의 정, 공적 등 제반 사정을 참작하여 <strong style="color:${EFFECTS[minLv].color}">${LEVEL_NAMES[minLv]}</strong>부터 <strong style="color:${EFFECTS[maxLv].color}">${LEVEL_NAMES[maxLv]}</strong> 사이에서 최종 결정</td></tr>`;
+  }
+  tbl.innerHTML += '</tbody>';
+
+  document.getElementById('modifierBlock').classList.remove('hidden');
+
+  block4.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function toggleModifiers(el) {
+  el.classList.toggle('open');
+  el.nextElementSibling.classList.toggle('open');
+}
+</script>
+</body>
+</html>
